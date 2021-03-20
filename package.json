@@ -1,0 +1,33 @@
+{
+  "name": "node-retail",
+  "version": "0.0.1",
+  "description": "this is a dummy app to learn node js",
+  "main": "app.js",
+  "scripts": {
+    "test": "jest",
+    "start": "node app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kashyapkrlucky/node-retail.git"
+  },
+  "author": "kashyapkrlucky",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/kashyapkrlucky/node-retail/issues"
+  },
+  "homepage": "https://github.com/kashyapkrlucky/node-retail#readme",
+  "dependencies": {
+    "bcryptjs": "2.4.3",
+    "body-parser": "1.18.3",
+    "colors": "1.3.3",
+    "express": "4.16.4",
+    "jsonwebtoken": "8.4.0",
+    "moment": "2.24.0",
+    "mongoose": "5.4.3",
+    "morgan": "1.9.1",
+    "nodemailer": "5.1.1",
+    "uuid": "3.3.2",
+    "winston": "3.1.0"
+  }
+}
