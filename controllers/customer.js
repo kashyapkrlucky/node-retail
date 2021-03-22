@@ -9,8 +9,6 @@ const Customer = require("../models/Customer");
 const { success, error } = require("../helpers/customResponse");
 const { secret } = require("../helpers/keys");
 
-
-
 // Exported Controller to get user signed up
 exports.signup = async (req, res, next) => {
     const { firstname, lastname, email, phone, password } = req.body;
