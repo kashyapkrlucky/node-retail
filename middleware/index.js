@@ -16,7 +16,7 @@ module.exports = (app) => {
 
     app.use(morgan(colors.magenta(':method :url :status :res[content-length] - :response-time ms')));
 
-    app.use(express.static(path.join(__dirname, 'public')));
+    app.use(express.static('public'));
     // Global Middleware like Origin, Method, Headers, Credentials
     app.use(function (req, res, next) {
         res.header('Access-Control-Allow-Origin', '*');
