@@ -1,0 +1,149 @@
+// Required Imports
+const jwt = require("jsonwebtoken");
+const bcryptjs = require("bcryptjs");
+
+// Models Imported
+const Vendor = require("../models/Vendor");
+
+// Helpers
+const { success, error } = require("../helpers/customResponse");
+const { secret } = require("../helpers/keys");
+const Product = require("../models/Product");
+const ProductList = require("../models/ProductList");
+
+// Exported Controller to get company signed up
+exports.create = async (req, res, next) => {
+    const { companyName, email, phone, password } = req.body;
+    const userExists = await Vendor.findOne({ email }).select({ _id: true });
+
+    // If email exists in system
+    if (userExists === null) {
+        // Generate Password Hash
+        const salt = await bcryptjs.genSalt(10);
+        const hashedPass = await bcryptjs.hash(password, salt);
+        const vendor = new Vendor({
+            companyName, email, password: hashedPass, phone
+        });
+        vendor
+            .save()
+            .then(doc => {
+                success(res, "", `${companyName} added in system`);
+            })
+            .catch(err => {
+                error(res, err, `error in adding company ${err}`);
+            });
+    } else {
+        // Sending response already registered with us
+        success(res, "", `company already registered with us`);
+    }
+};
+
+// Exported Controller to get user signed in
+exports.signin = async (req, res, next) => {
+    const { email, password } = req.body;
+    // if email exists
+    const emailFound = await Vendor.findOne({ email }).select({ _id: true, password: true });
+    if (emailFound) {
+        // Validate Password
+        const verifyPassword = await bcryptjs.compareSync(password, emailFound.password);
+        if (verifyPassword) {
+            // Generate and Send Token
+            let signOptions = { issuer: "Retail App", expiresIn: "23h" };
+            const authToken = jwt.sign({ id: emailFound._id, type: 'vendor' }, secret, signOptions);
+            success(res, authToken, `Authenticated`);
+        } else {
+            error(res, "", `Invalid User name or Password`);
+        }
+    } else {
+        error(res, "", `Invalid User name or Password`);
+    }
+};
+
+// Exported Controller to get user profile
+exports.getProfile = (req, res, next) => {
+    Vendor
+        .findById(req.params.id)
+        .select({ _id: false, password: false, createdOn: false, __v: false })
+        .then(doc => {
+            success(res, doc, `Vendor information ${doc ? "found" : "not found"}`);
+        })
+        .catch(err => {
+            error(res, "", "User information not found");
+        });
+};
+
+// Exported Controller to get user list
+exports.getList = (req, res, next) => {
+    const { page, size } = req.params;
+    const limit = parseInt(size, 10) || 10;
+    const skip = page && page === 1 ? 0 : (page - 1) * limit;
+    console.log(skip, limit);
+    Vendor
+        .find()
+        .skip(skip)
+        .limit(limit)
+        .select({ password: false, __v: false, _id: false, updated_at: false })
+        .then(docs => {
+            success(res, docs, `${docs.length} Vendor found`);
+        })
+        .catch(err => {
+            error(res, err, "Vendor not found");
+        });
+}
+
+// Add Product
+exports.addProduct = async (req, res, next) => {
+    const { category, brandName, productName, description, price, image, color, count } = req.body;
+    const bearer = await req['headers']['authorization'];
+    const token = await bearer && bearer.split(' ')[1];
+    const vendor = await jwt.verify(token, secret);
+    const isProductAdded = await Product.findOne({ productName });
+    const isVendorAdded = await isProductAdded && ProductList.findOne({ product: isProductAdded._id, vendor: vendor.id });
+
+    if (isVendorAdded) {
+        success(res, '', `product added already`);
+    } else {
+        const productSaved = await new Product({ category, brandName, productName, description, price, image, color }).save();
+        const productList = new ProductList({
+            vendor: vendor.id,
+            product: isProductAdded ? isProductAdded._id : productSaved._id,
+            price,
+            count
+        });
+        productList
+            .save()
+            .then(doc => {
+                success(res, doc._id, `product added`);
+            })
+            .catch(err => {
+                error(res, err, "Error in product adding");
+            });
+    }
+}
+
+// View Added Products
+exports.viewProducts = (req, res, next) => {
+    const { page, size, id } = req.params;
+    const limit = parseInt(size, 10) || 10;
+    const skip = page && page === 1 ? 0 : (page - 1) * limit;
+    ProductList
+        .find({ vendor: id })
+        .skip(skip)
+        .limit(limit)
+        .select({ __v: false, vendor: false, created_at: false, updated_at: false, })
+        .populate({
+            path: 'product',
+            select: { __v: false, created_at: false, updated_at: false, }
+        })
+        .then(docs => {
+            success(res, docs, `${docs.length} Products found`);
+        })
+        .catch(err => {
+            error(res, err, "Products not found");
+        });
+}
+
+
+// Update Product List
+// Open Orders
+// Change Order Status
