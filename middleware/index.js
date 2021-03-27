@@ -6,6 +6,10 @@ const path = require('path');
 
 // Route Definition
 const customer = require('../routes/customer');
+const vendor = require('../routes/vendor');
+const product = require('../routes/product');
+const order = require('../routes/order');
+
 
 // URL encoding, statics, morgan, logger & body parser middleware
 module.exports = (app) => {
@@ -16,7 +20,7 @@ module.exports = (app) => {
 
     app.use(morgan(colors.magenta(':method :url :status :res[content-length] - :response-time ms')));
 
-    app.use(express.static('public'));
+    app.use(express.static(path.join(__dirname, 'public')));
     // Global Middleware like Origin, Method, Headers, Credentials
     app.use(function (req, res, next) {
         res.header('Access-Control-Allow-Origin', '*');
@@ -28,4 +32,7 @@ module.exports = (app) => {
 
     // Routes
     app.use('/api/customer', customer);
+    app.use('/api/vendor', vendor);
+    app.use('/api/product', product);
+    app.use('/api/order', order);
 }
