@@ -36,7 +36,7 @@ exports.signup = async (req, res, next) => {
     }
 };
 
-// Exported Controller to login
+// Exported Controller to get user signed in
 exports.signin = async (req, res, next) => {
     const { email, password } = req.body;
     // if email exists
@@ -47,7 +47,7 @@ exports.signin = async (req, res, next) => {
         if (verifyPassword) {
             // Generate and Send Token
             let signOptions = { issuer: "Retail App", expiresIn: "23h" };
-            const authToken = jwt.sign({ id: emailFound._id }, secret, signOptions);
+            const authToken = jwt.sign({ id: emailFound._id, type: 'customer' }, secret, signOptions);
             success(res, authToken, `Authenticated`);
         } else {
             error(res, "", `Invalid User name or Password`);
@@ -57,7 +57,7 @@ exports.signin = async (req, res, next) => {
     }
 };
 
-// Exported Controller to get user list
+// Exported Controller to get user profile
 exports.getProfile = (req, res, next) => {
     Customer
         .findById(req.params.id)
@@ -66,6 +66,29 @@ exports.getProfile = (req, res, next) => {
             success(res, doc, `Customer information ${doc ? "found" : "not found"}`);
         })
         .catch(err => {
-            error(res, "", "User information not found");
+            error(res, "", "Customer information not found");
         });
 };
+
+// Exported Controller to get user list
+exports.getList = (req, res, next) => {
+    const { page, size } = req.params;
+    const limit = parseInt(size, 10) || 10;
+    const skip = page && page === 1 ? 0 : (page - 1) * limit;
+    Customer
+        .find()
+        .skip(skip)
+        .limit(limit)
+        .select({ password: false, __v: false, _id: false, updated_at: false })
+        .then(docs => {
+            success(res, docs, `${docs.length} Customer found`);
+        })
+        .catch(err => {
+            error(res, err, "Customer not found");
+        });
+}
+
+// Exported Controller to add orders
+// My Orders
+// Add address
+// My addresses
