@@ -24,4 +24,10 @@ router.post('/product/add', auth.isVendorUser, vendor.addProduct);
 // Vendor Added Product List
 router.get('/product/list/:page/:size/:id', auth.isVendorUser, vendor.viewProducts);
 
+// Vendor Order List
+router.get('/orders/:vendorId/:orderStatus', auth.isVendorUser, vendor.customerOrders);
+
+// Vendor Order Update
+router.put('/orders/update', auth.isVendorUser, vendor.updateOrder);
+
 module.exports = router;
