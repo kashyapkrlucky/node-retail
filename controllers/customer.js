@@ -8,6 +8,8 @@ const Customer = require("../models/Customer");
 // Helpers
 const { success, error } = require("../helpers/customResponse");
 const { secret } = require("../helpers/keys");
+const Address = require("../models/Address");
+const Order = require("../models/Order");
 
 // Exported Controller to get user signed up
 exports.signup = async (req, res, next) => {
@@ -41,7 +43,7 @@ exports.signin = async (req, res, next) => {
     const { email, password } = req.body;
     // if email exists
     const emailFound = await Customer.findOne({ email }).select({ _id: true, password: true });
-    if (emailFound) {
+    if (emailFound && password) {
         // Validate Password
         const verifyPassword = await bcryptjs.compareSync(password, emailFound.password);
         if (verifyPassword) {
@@ -88,7 +90,74 @@ exports.getList = (req, res, next) => {
         });
 }
 
-// Exported Controller to add orders
-// My Orders
 // Add address
+exports.addAddress = (req, res, next) => {
+    const { customerId, addressLine, landmark, city, state, zipcode } = req.body;
+    const address = new Address({
+        customerId, addressLine, landmark, city, state, zipcode
+    });
+    address
+        .save()
+        .then(doc => {
+            success(res, doc._id, 'Address added');
+        })
+        .catch(err => {
+            error(res, err, "Address not found");
+        });
+}
+
 // My addresses
+exports.myAddresses = (req, res, next) => {
+    const { customerId } = req.params;
+    Address
+        .find({ customerId })
+        .select({ created_at: false, __v: false, customerId: false, updated_at: false })
+        .then(docs => {
+            success(res, docs, `${docs.length} address found`);
+        })
+        .catch(err => {
+            error(res, err, "address not found");
+        });
+}
+
+// Exported Controller to add orders
+exports.addOrder = (req, res, next) => {
+    const { product, vendor, price, address } = req.body;
+    const order = new Order({
+        product, vendor, price, customer: req.params.customerId, address, orderStatus: 1, paymentMode: 1, paymentStatus: 1,
+    });
+    order
+        .save()
+        .then(doc => {
+            success(res, doc._id, 'order added');
+        })
+        .catch(err => {
+            error(res, err, "order not added");
+        });
+}
+
+// My Orders
+exports.myOrders = (req, res, next) => {
+    const { customerId } = req.params;
+    Order
+        .find({ customer: customerId })
+        .select({ customerId: false, __v: false, updated_at: false })
+        .populate({
+            path: 'product',
+            select: { image: true, productName: true, brandName: true }
+        })
+        .populate({
+            path: 'address',
+            select: { created_at: false, __v: false, customerId: false, updated_at: false }
+        })
+        .populate({
+            path: 'vendor',
+            select: { companyName: true }
+        })
+        .then(docs => {
+            success(res, docs, `${docs.length} order found`);
+        })
+        .catch(err => {
+            error(res, err, "order not found");
+        });
+}
