@@ -13,7 +13,7 @@ router.post('/sign-up', customer.signup);
 router.post('/sign-in', customer.signin);
 
 // Customer Profile
-router.get('/:id', auth.validateUser, customer.getProfile);
+router.get('/:id', auth.isCustomerUser, customer.getProfile);
 
 // Customer List
 router.get('/list/:page/:size', customer.getList);
