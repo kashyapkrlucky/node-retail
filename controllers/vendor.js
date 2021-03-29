@@ -10,6 +10,7 @@ const { success, error } = require("../helpers/customResponse");
 const { secret } = require("../helpers/keys");
 const Product = require("../models/Product");
 const ProductList = require("../models/ProductList");
+const Order = require("../models/Order");
 
 // Exported Controller to get company signed up
 exports.create = async (req, res, next) => {
@@ -143,7 +144,50 @@ exports.viewProducts = (req, res, next) => {
         });
 }
 
-
 // Update Product List
-// Open Orders
+// Customer Orders
+exports.customerOrders = (req, res, next) => {
+    const { vendorId, orderStatus } = req.params;
+    Order
+        .find({
+            vendor: vendorId,
+            orderStatus
+        })
+        .select({ vendor: false, __v: false, updated_at: false })
+        .populate({
+            path: 'product',
+            select: { image: true, productName: true, brandName: true }
+        })
+        .populate({
+            path: 'address',
+            select: { created_at: false, __v: false, customerId: false, updated_at: false }
+        })
+        .populate({
+            path: 'customer',
+            select: { firstname: true, lastname: true, email: true, phone: true }
+        })
+        .then(docs => {
+            success(res, docs, `${docs.length} order found`);
+        })
+        .catch(err => {
+            error(res, err, "order not found");
+        });
+}
+
 // Change Order Status
+
+exports.updateOrder = (req, res, next) => {
+    const { orderId, orderStatus } = req.body;
+    Order
+        .findByIdAndUpdate(
+            orderId,
+            { orderStatus },
+            { new: true }
+        )
+        .then(doc => {
+            success(res, doc._id, `Order updated`);
+        })
+        .catch(err => {
+            error(res, err, "Error in updating");
+        });
+}
