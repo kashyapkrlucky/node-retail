@@ -43,11 +43,12 @@ exports.validateUser = (req, res, next) => {
 // Validate Vendor User
 exports.isCustomerUser = (req, res, next) => {
     const bearer = req['headers']['authorization'];
+    const customerId = req.params.id || req.params.customerId || req.body.customerId;
     if (bearer) {
         const token = bearer.split(' ')[1];
         jwt.verify(token, secret, function (err, value) {
             if (value) {
-                if (value.type === 'customer') {
+                if (value.type === 'customer' && value.id === customerId) {
                     next();
                 } else {
                     unauthorize(res, '', 'You are not authorize to view');
@@ -64,11 +65,12 @@ exports.isCustomerUser = (req, res, next) => {
 // Validate Vendor User
 exports.isVendorUser = (req, res, next) => {
     const bearer = req['headers']['authorization'];
+    const vendorId = req.params.id || req.params.vendorId || req.body.vendorId;
     if (bearer) {
         const token = bearer.split(' ')[1];
         jwt.verify(token, secret, function (err, value) {
             if (value) {
-                if (value.type === 'vendor') {
+                if (value.type === 'vendor' && value.id === vendorId) {
                     next();
                 } else {
                     unauthorize(res, '', 'You are not authorize to view');
