@@ -18,4 +18,16 @@ router.get('/:id', auth.validateUser, customer.getProfile);
 // Customer List
 router.get('/list/:page/:size', customer.getList);
 
+// Customer Address Add
+router.post('/address/add', auth.isCustomerUser, customer.addAddress);
+
+// Customer Addresses
+router.get('/address/list/:customerId', auth.isCustomerUser, customer.myAddresses);
+
+// Customer Address Add
+router.post('/order/add/:customerId', auth.isCustomerUser, customer.addOrder);
+
+// Customer Addresses
+router.get('/order/list/:customerId', auth.isCustomerUser, customer.myOrders);
+
 module.exports = router;
