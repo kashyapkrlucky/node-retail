@@ -6,17 +6,12 @@ const auth = require('../helpers/authentication');
 
 
 /***************** Vendor Actions ******************/
-// Vendor Sign Up
-router.post('/create', vendor.create);
 
 // Vendor Sign In
 router.post('/sign-in', vendor.signin);
 
 // Vendor Profile
 router.get('/:id', auth.isVendorUser, vendor.getProfile);
-
-// Vendor List
-router.get('/list/:page/:size', vendor.getList);
 
 // Vendor Add Product
 router.post('/product/add', auth.isVendorUser, vendor.addProduct);

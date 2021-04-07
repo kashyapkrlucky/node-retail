@@ -15,9 +15,6 @@ router.post('/sign-in', customer.signin);
 // Customer Profile
 router.get('/:id', auth.isCustomerUser, customer.getProfile);
 
-// Customer List
-router.get('/list/:page/:size', customer.getList);
-
 // Customer Address Add
 router.post('/address/add', auth.isCustomerUser, customer.addAddress);
 

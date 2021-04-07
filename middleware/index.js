@@ -5,6 +5,7 @@ const express = require('express');
 const path = require('path');
 
 // Route Definition
+const admin = require('../routes/admin');
 const customer = require('../routes/customer');
 const vendor = require('../routes/vendor');
 const product = require('../routes/product');
@@ -31,6 +32,7 @@ module.exports = (app) => {
     });
 
     // Routes
+    app.use('/api/admin', admin);
     app.use('/api/customer', customer);
     app.use('/api/vendor', vendor);
     app.use('/api/product', product);

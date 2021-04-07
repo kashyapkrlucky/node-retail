@@ -12,33 +12,6 @@ const Product = require("../models/Product");
 const ProductList = require("../models/ProductList");
 const Order = require("../models/Order");
 
-// Exported Controller to get company signed up
-exports.create = async (req, res, next) => {
-    const { companyName, email, phone, password } = req.body;
-    const userExists = await Vendor.findOne({ email }).select({ _id: true });
-
-    // If email exists in system
-    if (userExists === null) {
-        // Generate Password Hash
-        const salt = await bcryptjs.genSalt(10);
-        const hashedPass = await bcryptjs.hash(password, salt);
-        const vendor = new Vendor({
-            companyName, email, password: hashedPass, phone
-        });
-        vendor
-            .save()
-            .then(doc => {
-                success(res, "", `${companyName} added in system`);
-            })
-            .catch(err => {
-                error(res, err, `error in adding company ${err}`);
-            });
-    } else {
-        // Sending response already registered with us
-        success(res, "", `company already registered with us`);
-    }
-};
-
 // Exported Controller to get user signed in
 exports.signin = async (req, res, next) => {
     const { email, password } = req.body;
@@ -72,25 +45,6 @@ exports.getProfile = (req, res, next) => {
             error(res, "", "User information not found");
         });
 };
-
-// Exported Controller to get user list
-exports.getList = (req, res, next) => {
-    const { page, size } = req.params;
-    const limit = parseInt(size, 10) || 10;
-    const skip = page && page === 1 ? 0 : (page - 1) * limit;
-    console.log(skip, limit);
-    Vendor
-        .find()
-        .skip(skip)
-        .limit(limit)
-        .select({ password: false, __v: false, _id: false, updated_at: false })
-        .then(docs => {
-            success(res, docs, `${docs.length} Vendor found`);
-        })
-        .catch(err => {
-            error(res, err, "Vendor not found");
-        });
-}
 
 // Add Product
 exports.addProduct = async (req, res, next) => {
@@ -175,7 +129,6 @@ exports.customerOrders = (req, res, next) => {
 }
 
 // Change Order Status
-
 exports.updateOrder = (req, res, next) => {
     const { orderId, orderStatus } = req.body;
     Order

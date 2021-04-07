@@ -72,24 +72,6 @@ exports.getProfile = (req, res, next) => {
         });
 };
 
-// Exported Controller to get user list
-exports.getList = (req, res, next) => {
-    const { page, size } = req.params;
-    const limit = parseInt(size, 10) || 10;
-    const skip = page && page === 1 ? 0 : (page - 1) * limit;
-    Customer
-        .find()
-        .skip(skip)
-        .limit(limit)
-        .select({ password: false, __v: false, _id: false, updated_at: false })
-        .then(docs => {
-            success(res, docs, `${docs.length} Customer found`);
-        })
-        .catch(err => {
-            error(res, err, "Customer not found");
-        });
-}
-
 // Add address
 exports.addAddress = (req, res, next) => {
     const { customerId, addressLine, landmark, city, state, zipcode } = req.body;

@@ -1,6 +1,8 @@
 // Import modules
 const express = require('express');
 const PORT = process.env.PORT || 3000;
+const colors = require('colors');
+
 // express app defintion
 const app = express();
 
@@ -12,5 +14,5 @@ require('./middleware')(app);
 
 // listening app
 app.listen(PORT, () => {
-    console.log(`Your server is running on PORT ${PORT}`);
+    console.log(colors.magenta(`Your server is running on PORT ${PORT}`));
 });

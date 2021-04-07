@@ -83,3 +83,25 @@ exports.isVendorUser = (req, res, next) => {
         unauthorize(res, '', 'You are not authorize to view');
     }
 }
+
+// Validate Admin User
+exports.isAdminUser = (req, res, next) => {
+    const bearer = req['headers']['authorization'];
+    const adminId = req.params.id || req.params.adminId || req.body.adminId;
+    if (bearer) {
+        const token = bearer.split(' ')[1];
+        jwt.verify(token, secret, function (err, value) {
+            if (value) {
+                if (value.type === 'admin') {
+                    next();
+                } else {
+                    unauthorize(res, '', 'You are not authorize to view');
+                }
+            } else {
+                unauthorize(res, '', 'Invalid Token');
+            }
+        });
+    } else {
+        unauthorize(res, '', 'You are not authorize to view');
+    }
+}
